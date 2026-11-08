@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -367,7 +366,7 @@
       line-height: 1.6;
     }
 
-    /* 印刷スタイル */
+    /* 1ページ内に綺麗に収める印刷専用スタイル */
     @media print {
       @page {
         size: A4 portrait;
@@ -578,6 +577,15 @@
 
     let seatAssignment = new Array(TOTAL_SEATS).fill(null);
 
+    // 単一番号指定ルールの識別判定リスト
+    const SINGLE_NUMBER_RULES = [
+      'front_2rows', 'front_3rows', 
+      'center_3cols', 'center_5cols', 
+      'left_2cols', 'left_3cols', 
+      'right_2cols', 'right_3cols', 
+      'not_last_row'
+    ];
+
     window.addEventListener('DOMContentLoaded', () => {
       renderSeats();
       renderMiniGrid();
@@ -688,24 +696,23 @@
       container.innerHTML = '';
       config.rules.forEach(r => addRuleRow(r));
 
-      // プリセット一覧のロード
       fetchPresetList();
-
       openModal('adminModal');
     }
 
+    // 新選択肢を追加した条件追加UI関数
     function addRuleRow(data = { num1: '', num2: '', type: 'not_adjacent' }) {
       const container = document.getElementById('rulesContainer');
       const row = document.createElement('div');
       row.className = 'rule-item';
       
-      const isSingleNumberRule = (type) => ['front_2rows', 'front_3rows', 'center_3cols', 'center_5cols'].includes(type);
+      const isSingle = SINGLE_NUMBER_RULES.includes(data.type);
 
       row.innerHTML = `
         <span class="rule-text">番号</span>
         <input type="number" class="rule-num1" value="${data.num1}" placeholder="A" min="1">
-        <span class="rule-text target-b-label" style="display: ${isSingleNumberRule(data.type) ? 'none' : 'inline'};">を 番号</span>
-        <input type="number" class="rule-num2" value="${data.num2 || ''}" placeholder="B" min="1" style="display: ${isSingleNumberRule(data.type) ? 'none' : 'inline-block'};">
+        <span class="rule-text target-b-label" style="display: ${isSingle ? 'none' : 'inline'};">を 番号</span>
+        <input type="number" class="rule-num2" value="${data.num2 || ''}" placeholder="B" min="1" style="display: ${isSingle ? 'none' : 'inline-block'};">
         <span class="rule-text">の / を</span>
         <select class="rule-type" onchange="toggleRuleInputs(this)">
           <option value="not_adjacent" ${data.type === 'not_adjacent' ? 'selected' : ''}>隣り合わない位置（前後左右斜めNG）に配置</option>
@@ -718,10 +725,16 @@
           <option value="num1_left" ${data.type === 'num1_left' ? 'selected' : ''}>左側に配置 (AがBの左)</option>
           <option value="num1_front" ${data.type === 'num1_front' ? 'selected' : ''}>前側に配置 (AがBの前)</option>
           <option value="num1_back" ${data.type === 'num1_back' ? 'selected' : ''}>後ろ側に配置 (AがBの後ろ)</option>
+          <!-- 位置指定系ルール -->
           <option value="front_2rows" ${data.type === 'front_2rows' ? 'selected' : ''}>前方2行目までに配置（前後の位置）</option>
           <option value="front_3rows" ${data.type === 'front_3rows' ? 'selected' : ''}>前方3行目までに配置（前後の位置）</option>
           <option value="center_3cols" ${data.type === 'center_3cols' ? 'selected' : ''}>中央3列に配置（左右の位置）</option>
           <option value="center_5cols" ${data.type === 'center_5cols' ? 'selected' : ''}>中央5列に配置（左右の位置）</option>
+          <option value="left_2cols" ${data.type === 'left_2cols' ? 'selected' : ''}>左側の2列に配置（左右の位置）</option>
+          <option value="left_3cols" ${data.type === 'left_3cols' ? 'selected' : ''}>左側の3列に配置（左右の位置）</option>
+          <option value="right_2cols" ${data.type === 'right_2cols' ? 'selected' : ''}>右側の2列に配置（左右の位置）</option>
+          <option value="right_3cols" ${data.type === 'right_3cols' ? 'selected' : ''}>右側の3列に配置（左右の位置）</option>
+          <option value="not_last_row" ${data.type === 'not_last_row' ? 'selected' : ''}>一番後ろにしない（後ろが空席の場合も不可）</option>
         </select>
         <button type="button" class="btn btn-danger" style="padding:4px 8px;" onclick="this.parentElement.remove()">&times;</button>
       `;
@@ -734,7 +747,7 @@
       const labelB = parent.querySelector('.target-b-label');
       const val = selectEl.value;
 
-      if (['front_2rows', 'front_3rows', 'center_3cols', 'center_5cols'].includes(val)) {
+      if (SINGLE_NUMBER_RULES.includes(val)) {
         num2Input.style.display = 'none';
         if (labelB) labelB.style.display = 'none';
       } else {
@@ -760,7 +773,7 @@
         const type = el.querySelector('.rule-type').value;
 
         if (!isNaN(n1)) {
-          if (['front_2rows', 'front_3rows', 'center_3cols', 'center_5cols'].includes(type)) {
+          if (SINGLE_NUMBER_RULES.includes(type)) {
             rules.push({ num1: n1, num2: null, type });
           } else if (!isNaN(n2)) {
             rules.push({ num1: n1, num2: n2, type });
@@ -814,9 +827,6 @@
       renderSeats();
     }
 
-    // --------------------------------------------------
-    // プリセット機能 (GAS連携)
-    // --------------------------------------------------
     async function fetchPresetList() {
       const gasUrl = localStorage.getItem('gas_app_url');
       const select = document.getElementById('presetSelect');
@@ -979,6 +989,7 @@
       }, 30);
     }
 
+    // 新条件を追加したペナルティ算出処理
     function calculatePenalty(grid, rules) {
       let posMap = new Map();
       for (let i = 0; i < grid.length; i++) {
@@ -991,11 +1002,28 @@
           const p1 = posMap.get(rule.num1);
           const r1 = Math.floor(p1 / COLS), c1 = p1 % COLS;
 
+          // 単一指定系ルール
           if (rule.type === 'front_2rows' && r1 >= 2) penalty++;
           else if (rule.type === 'front_3rows' && r1 >= 3) penalty++;
           else if (rule.type === 'center_3cols' && (c1 < 2 || c1 > 4)) penalty++;
           else if (rule.type === 'center_5cols' && (c1 < 1 || c1 > 5)) penalty++;
+          else if (rule.type === 'left_2cols' && c1 >= 2) penalty++;
+          else if (rule.type === 'left_3cols' && c1 >= 3) penalty++;
+          else if (rule.type === 'right_2cols' && c1 < 5) penalty++;
+          else if (rule.type === 'right_3cols' && c1 < 4) penalty++;
+          else if (rule.type === 'not_last_row') {
+            // 最最終行（6行目）か、または直後の行の同じ列が空席（有効席がない）の場合はNG
+            if (r1 === ROWS - 1) {
+              penalty++;
+            } else {
+              const behindIdx = (r1 + 1) * COLS + c1;
+              if (config.emptySeats[behindIdx]) {
+                penalty++;
+              }
+            }
+          }
 
+          // 2人組ペア指定ルール
           if (posMap.has(rule.num2)) {
             const p2 = posMap.get(rule.num2);
             const r2 = Math.floor(p2 / COLS), c2 = p2 % COLS;
