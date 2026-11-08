@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>席決めアプリ「せきぎめくん」</title>
+  <title>座席決めアプリ (Classroom Seating Master)</title>
   <style>
     :root {
       --bg-color: #0f172a;
@@ -96,6 +96,7 @@
       gap: 12px;
       flex-wrap: wrap;
       justify-content: center;
+      align-items: center;
     }
 
     .draw-btn {
@@ -107,6 +108,16 @@
     .draw-btn:hover {
       box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6);
       transform: translateY(-2px);
+    }
+
+    /* リセットボタン専用スタイル */
+    .reset-btn {
+      font-size: 1.1rem;
+      padding: 14px 24px;
+      background-color: #475569;
+    }
+    .reset-btn:hover {
+      background-color: #334155;
     }
 
     /* 黒板 / 前方表示 */
@@ -431,6 +442,8 @@
 
   <div class="controls">
     <button class="btn draw-btn" onclick="drawSeats()">抽選スタート！</button>
+    <!-- リセットボタン追加 -->
+    <button class="btn reset-btn" onclick="resetSeats()">リセット</button>
     <button class="btn btn-success" onclick="downloadCSV()">CSV保存</button>
     <button class="btn btn-secondary" onclick="window.print()">印刷</button>
   </div>
@@ -497,7 +510,7 @@
         <div id="rulesContainer"></div>
       </div>
 
-      <!-- 全端末共通パスワード変更設定 -->
+      <!-- パスワード変更設定 -->
       <div class="form-group" style="border-top: 1px dashed var(--card-border); padding-top: 16px;">
         <label class="form-label">管理画面パスワードの変更（全端末に共通反映）</label>
         <div class="form-row">
@@ -622,7 +635,6 @@
       openModal('authModal');
     }
 
-    // GAS経由またはオフラインでの全端末パスワード照合
     async function handleAuth(e) {
       e.preventDefault();
       const pwdInput = document.getElementById('authPassword').value;
@@ -657,7 +669,6 @@
           }
         }
       } else {
-        // GAS未設定時は初期パスワード「skg42」
         if (pwdInput === "skg42") {
           currentAuthedPassword = pwdInput;
           closeModal('authModal');
@@ -694,9 +705,11 @@
         <span class="rule-text">の</span>
         <select class="rule-type">
           <option value="not_adjacent" ${data.type === 'not_adjacent' ? 'selected' : ''}>隣り合わない位置（前後左右斜めNG）に配置</option>
-          <option value="distance_2" ${data.type === 'distance_2' ? 'selected' : ''}>2席以上離れた位置に配置</option>
+          <option value="distance_2" ${data.type === 'distance_2' ? 'selected' : ''}>2席以上離れた位置に配置（全方向）</option>
           <option value="adjacent_side" ${data.type === 'adjacent_side' ? 'selected' : ''}>左右隣（横隣り）に配置</option>
           <option value="adjacent_any" ${data.type === 'adjacent_any' ? 'selected' : ''}>前後左右で隣り合う位置に配置</option>
+          <option value="num1_side_dist2" ${data.type === 'num1_side_dist2' ? 'selected' : ''}>横（列）に2列以上間をあける</option>
+          <option value="num1_vert_dist2" ${data.type === 'num1_vert_dist2' ? 'selected' : ''}>縦（行）に2行以上間をあける</option>
           <option value="num1_right" ${data.type === 'num1_right' ? 'selected' : ''}>右側に配置 (AがBの右)</option>
           <option value="num1_left" ${data.type === 'num1_left' ? 'selected' : ''}>左側に配置 (AがBの左)</option>
           <option value="num1_front" ${data.type === 'num1_front' ? 'selected' : ''}>前側に配置 (AがBの前)</option>
@@ -716,7 +729,6 @@
         return;
       }
 
-      // 欠番入力の正規化（スペース・全角・カンマ対応）
       const missingStr = document.getElementById('missingNums').value.trim();
       let missingArr = missingStr ? missingStr.split(/[\s,、]+/) : [];
       missingArr = missingArr.map(n => parseInt(n)).filter(n => !isNaN(n) && n >= start && n <= end);
@@ -734,7 +746,6 @@
         }
       });
 
-      // GAS全端末共有パスワードの変更処理
       const newPwd = document.getElementById('newPassword').value.trim();
       const gasUrl = localStorage.getItem('gas_app_url');
 
@@ -778,6 +789,12 @@
       closeModal('gasModal');
     }
 
+    // 座席配置のリセット処理
+    function resetSeats() {
+      seatAssignment = new Array(TOTAL_SEATS).fill(null);
+      renderSeats();
+    }
+
     function drawSeats() {
       let students = [];
       for (let i = config.startNum; i <= config.endNum; i++) {
@@ -814,7 +831,6 @@
       }
     }
 
-    // バックグラウンドでGASへ保存
     async function sendResultToGAS(solution) {
       const gasUrl = localStorage.getItem('gas_app_url');
       if (!gasUrl) return;
@@ -877,6 +893,12 @@
           if (rule.type === 'distance_2' && dr <= 2 && dc <= 2) return false;
           if (rule.type === 'adjacent_side' && (dr !== 0 || dc !== 1)) return false;
           if (rule.type === 'adjacent_any' && dr + dc !== 1) return false;
+
+          // 横（列）に2列以上あける (間が2列以上ある＝列差が3以上)
+          if (rule.type === 'num1_side_dist2' && dc < 3) return false;
+          // 縦（行）に2行以上あける (間が2行以上ある＝行差が3以上)
+          if (rule.type === 'num1_vert_dist2' && dr < 3) return false;
+
           if (rule.type === 'num1_right' && c1 <= c2) return false;
           if (rule.type === 'num1_left' && c1 >= c2) return false;
           if (rule.type === 'num1_front' && r1 >= r2) return false;
