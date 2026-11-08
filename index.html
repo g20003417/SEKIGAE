@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -298,6 +299,14 @@
     .form-row { display: flex; gap: 12px; }
     .form-row .form-group { flex: 1; }
 
+    .preset-box {
+      background: #0f172a;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 20px;
+    }
+
     /* 空席ミニグリッド */
     .mini-grid {
       display: grid;
@@ -358,7 +367,7 @@
       line-height: 1.6;
     }
 
-    /* 1ページ内に綺麗に収める印刷専用スタイル */
+    /* 印刷スタイル */
     @media print {
       @page {
         size: A4 portrait;
@@ -393,9 +402,7 @@
         margin-bottom: 12px !important;
       }
       .blackboard::after { color: #475569 !important; }
-      .seating-grid {
-        gap: 6px !important;
-      }
+      .seating-grid { gap: 6px !important; }
       .seat {
         background: white !important;
         color: black !important;
@@ -458,6 +465,21 @@
         <button class="close-btn" onclick="closeModal('adminModal')">&times;</button>
       </div>
       
+      <!-- プリセット保存・呼び出しセクション -->
+      <div class="preset-box">
+        <label class="form-label" style="color:#38bdf8;">★ 条件プリセット（GAS連携で全端末共有）</label>
+        <div class="form-row" style="margin-bottom:8px;">
+          <select id="presetSelect" class="form-select">
+            <option value="">-- 保存済みプリセットを選択 --</option>
+          </select>
+          <button type="button" class="btn btn-success" style="padding:6px 14px;" onclick="loadPreset()">読み込む</button>
+        </div>
+        <div class="form-row">
+          <input type="text" id="presetNameInput" class="form-input" placeholder="例: 1学期通常, テスト配置">
+          <button type="button" class="btn" style="padding:6px 14px; white-space:nowrap;" onclick="savePreset()">保存する</button>
+        </div>
+      </div>
+
       <!-- 1. 空席指定 -->
       <div class="form-group">
         <label class="form-label">1. 空席の選択（タップして空席を切り替え）</label>
@@ -500,7 +522,7 @@
 
       <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:24px;">
         <button class="btn btn-secondary" onclick="closeModal('adminModal')">キャンセル</button>
-        <button class="btn" onclick="saveSettings()">設定を保存</button>
+        <button class="btn" onclick="saveSettings()">設定を適用して閉じる</button>
       </div>
     </div>
   </div>
@@ -529,7 +551,7 @@
         <button class="close-btn" onclick="closeModal('gasModal')">&times;</button>
       </div>
       <div class="form-group">
-        <label class="form-label">GAS WebアプリURL (パスワード全端末同期用)</label>
+        <label class="form-label">GAS WebアプリURL</label>
         <input type="url" id="gasUrlInput" class="form-input" placeholder="https://script.google.com/macros/s/.../exec">
       </div>
       <button class="btn btn-success" style="width:100%; margin-bottom:16px;" onclick="saveGasUrl()">URLを保存</button>
@@ -666,10 +688,12 @@
       container.innerHTML = '';
       config.rules.forEach(r => addRuleRow(r));
 
+      // プリセット一覧のロード
+      fetchPresetList();
+
       openModal('adminModal');
     }
 
-    // 新条件・統一した表現での選択肢生成
     function addRuleRow(data = { num1: '', num2: '', type: 'not_adjacent' }) {
       const container = document.getElementById('rulesContainer');
       const row = document.createElement('div');
@@ -694,7 +718,6 @@
           <option value="num1_left" ${data.type === 'num1_left' ? 'selected' : ''}>左側に配置 (AがBの左)</option>
           <option value="num1_front" ${data.type === 'num1_front' ? 'selected' : ''}>前側に配置 (AがBの前)</option>
           <option value="num1_back" ${data.type === 'num1_back' ? 'selected' : ''}>後ろ側に配置 (AがBの後ろ)</option>
-          <!-- 統一・拡充された配置位置ルール -->
           <option value="front_2rows" ${data.type === 'front_2rows' ? 'selected' : ''}>前方2行目までに配置（前後の位置）</option>
           <option value="front_3rows" ${data.type === 'front_3rows' ? 'selected' : ''}>前方3行目までに配置（前後の位置）</option>
           <option value="center_3cols" ${data.type === 'center_3cols' ? 'selected' : ''}>中央3列に配置（左右の位置）</option>
@@ -720,15 +743,9 @@
       }
     }
 
-    async function saveSettings() {
+    function getCurrentFormConfig() {
       const start = parseInt(document.getElementById('startNum').value) || 1;
       const end = parseInt(document.getElementById('endNum').value) || 1;
-      
-      if (start > end) {
-        alert('開始番号は終了番号以下にしてください。');
-        return;
-      }
-
       const missingStr = document.getElementById('missingNums').value.trim();
       let missingArr = missingStr ? missingStr.split(/[\s,、]+/) : [];
       missingArr = missingArr.map(n => parseInt(n)).filter(n => !isNaN(n) && n >= start && n <= end);
@@ -750,6 +767,22 @@
           }
         }
       });
+
+      return {
+        emptySeats: [...config.emptySeats],
+        startNum: start,
+        endNum: end,
+        missingNums: missingArr,
+        rules: rules
+      };
+    }
+
+    async function saveSettings() {
+      const newConfig = getCurrentFormConfig();
+      if (newConfig.startNum > newConfig.endNum) {
+        alert('開始番号は終了番号以下にしてください。');
+        return;
+      }
 
       const newPwd = document.getElementById('newPassword').value.trim();
       const gasUrl = localStorage.getItem('gas_app_url');
@@ -776,13 +809,117 @@
         }
       }
 
-      config.startNum = start;
-      config.endNum = end;
-      config.missingNums = missingArr;
-      config.rules = rules;
-
+      config = newConfig;
       closeModal('adminModal');
       renderSeats();
+    }
+
+    // --------------------------------------------------
+    // プリセット機能 (GAS連携)
+    // --------------------------------------------------
+    async function fetchPresetList() {
+      const gasUrl = localStorage.getItem('gas_app_url');
+      const select = document.getElementById('presetSelect');
+      select.innerHTML = '<option value="">-- 保存済みプリセットを選択 --</option>';
+
+      if (!gasUrl) return;
+
+      try {
+        const res = await fetch(gasUrl, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'getPresetList' })
+        });
+        const json = await res.json();
+        if (json.success && json.presets) {
+          json.presets.forEach(name => {
+            const opt = document.createElement('option');
+            opt.value = name;
+            opt.innerText = name;
+            select.appendChild(opt);
+          });
+        }
+      } catch(err) {
+        console.error("プリセット一覧取得失敗", err);
+      }
+    }
+
+    async function savePreset() {
+      const name = document.getElementById('presetNameInput').value.trim();
+      if (!name) {
+        alert('プリセット名を入力してください。');
+        return;
+      }
+
+      const formConfig = getCurrentFormConfig();
+      const gasUrl = localStorage.getItem('gas_app_url');
+
+      if (gasUrl) {
+        try {
+          const res = await fetch(gasUrl, {
+            method: 'POST',
+            body: JSON.stringify({ action: 'savePreset', presetName: name, config: formConfig })
+          });
+          const json = await res.json();
+          if (json.success) {
+            alert(`プリセット「${name}」を保存しました。`);
+            document.getElementById('presetNameInput').value = '';
+            fetchPresetList();
+          } else {
+            alert('保存に失敗しました。');
+          }
+        } catch(err) {
+          alert('通信エラーが発生しました。');
+        }
+      } else {
+        localStorage.setItem('local_preset_' + name, JSON.stringify(formConfig));
+        alert(`GAS未連携のため、ローカルブラウザに「${name}」を保存しました。`);
+      }
+    }
+
+    async function loadPreset() {
+      const name = document.getElementById('presetSelect').value;
+      if (!name) {
+        alert('読み込むプリセットを選択してください。');
+        return;
+      }
+
+      const gasUrl = localStorage.getItem('gas_app_url');
+
+      if (gasUrl) {
+        try {
+          const res = await fetch(gasUrl, {
+            method: 'POST',
+            body: JSON.stringify({ action: 'loadPreset', presetName: name })
+          });
+          const json = await res.json();
+          if (json.success && json.config) {
+            applyLoadedConfig(json.config);
+            alert(`プリセット「${name}」を読み込みました。`);
+          } else {
+            alert('読み込みに失敗しました。');
+          }
+        } catch(err) {
+          alert('通信エラーが発生しました。');
+        }
+      } else {
+        const localData = localStorage.getItem('local_preset_' + name);
+        if (localData) {
+          applyLoadedConfig(JSON.parse(localData));
+          alert(`ローカルプリセット「${name}」を読み込みました。`);
+        }
+      }
+    }
+
+    function applyLoadedConfig(loaded) {
+      config = loaded;
+      renderMiniGrid();
+      document.getElementById('startNum').value = config.startNum;
+      document.getElementById('endNum').value = config.endNum;
+      document.getElementById('missingNums').value = config.missingNums.join(' ');
+      
+      const container = document.getElementById('rulesContainer');
+      container.innerHTML = '';
+      config.rules.forEach(r => addRuleRow(r));
     }
 
     function openGasModal() { openModal('gasModal'); }
@@ -842,7 +979,6 @@
       }, 30);
     }
 
-    // 新条件に対応したペナルティ判定
     function calculatePenalty(grid, rules) {
       let posMap = new Map();
       for (let i = 0; i < grid.length; i++) {
@@ -855,25 +991,11 @@
           const p1 = posMap.get(rule.num1);
           const r1 = Math.floor(p1 / COLS), c1 = p1 % COLS;
 
-          // 単一指定ルール
-          if (rule.type === 'front_2rows') {
-            if (r1 >= 2) penalty++;
-            continue;
-          }
-          if (rule.type === 'front_3rows') {
-            if (r1 >= 3) penalty++; // 前方3行目＝0,1,2行目以外はペナルティ
-            continue;
-          }
-          if (rule.type === 'center_3cols') {
-            if (c1 < 2 || c1 > 4) penalty++; // 中央3列＝2,3,4列目
-            continue;
-          }
-          if (rule.type === 'center_5cols') {
-            if (c1 < 1 || c1 > 5) penalty++; // 中央5列＝1,2,3,4,5列目 (両端0, 6列目以外)
-            continue;
-          }
+          if (rule.type === 'front_2rows' && r1 >= 2) penalty++;
+          else if (rule.type === 'front_3rows' && r1 >= 3) penalty++;
+          else if (rule.type === 'center_3cols' && (c1 < 2 || c1 > 4)) penalty++;
+          else if (rule.type === 'center_5cols' && (c1 < 1 || c1 > 5)) penalty++;
 
-          // 2人組ペア指定ルール
           if (posMap.has(rule.num2)) {
             const p2 = posMap.get(rule.num2);
             const r2 = Math.floor(p2 / COLS), c2 = p2 % COLS;
