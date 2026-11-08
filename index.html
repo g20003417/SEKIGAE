@@ -542,7 +542,6 @@
 
     let seatAssignment = new Array(TOTAL_SEATS).fill(null);
 
-    // 単一番号指定ルールの識別判定リスト（not_first_rowを追加）
     const SINGLE_NUMBER_RULES = [
       'front_2rows', 'front_3rows', 
       'center_3cols', 'center_5cols', 
@@ -677,7 +676,6 @@
       openModal('adminModal');
     }
 
-    // 上へ・下へ移動付きの条件選択肢生成関数
     function addRuleRow(data = { num1: '', num2: '', type: 'not_adjacent' }) {
       const container = document.getElementById('rulesContainer');
       const row = document.createElement('div');
@@ -702,7 +700,6 @@
           <option value="num1_left" ${data.type === 'num1_left' ? 'selected' : ''}>左側に配置 (AがBの左)</option>
           <option value="num1_front" ${data.type === 'num1_front' ? 'selected' : ''}>前側に配置 (AがBの前)</option>
           <option value="num1_back" ${data.type === 'num1_back' ? 'selected' : ''}>後ろ側に配置 (AがBの後ろ)</option>
-          <!-- 位置指定系ルール -->
           <option value="front_2rows" ${data.type === 'front_2rows' ? 'selected' : ''}>前方2行目までに配置（前後の位置）</option>
           <option value="front_3rows" ${data.type === 'front_3rows' ? 'selected' : ''}>前方3行目までに配置（前後の位置）</option>
           <option value="center_3cols" ${data.type === 'center_3cols' ? 'selected' : ''}>中央3列に配置（左右の位置）</option>
@@ -723,7 +720,6 @@
       container.appendChild(row);
     }
 
-    // 行並べ替え処理
     function moveRuleRow(btn, direction) {
       const row = btn.closest('.rule-item');
       if (direction === -1 && row.previousElementSibling) {
@@ -975,7 +971,6 @@
       }, 30);
     }
 
-    // 「最前列にしない」ペナルティ判定ロジックを含む計算関数
     function calculatePenalty(grid, rules) {
       let posMap = new Map();
       for (let i = 0; i < grid.length; i++) {
@@ -997,7 +992,6 @@
           else if (rule.type === 'right_2cols' && c1 < 5) penalty++;
           else if (rule.type === 'right_3cols' && c1 < 4) penalty++;
           else if (rule.type === 'not_first_row') {
-            // 1行目か、直前（同じ列の1行上）が空席の場合はNG
             if (r1 === 0) {
               penalty++;
             } else {
@@ -1008,7 +1002,6 @@
             }
           }
           else if (rule.type === 'not_last_row') {
-            // 最最終行か、直後（同じ列の1行下）が空席の場合はNG
             if (r1 === ROWS - 1) {
               penalty++;
             } else {
@@ -1100,12 +1093,13 @@
       openModal('errorModal');
     }
 
+    // 修正済み：文字化け防止BOM（Byte Order Mark）付きCSV出力処理
     function downloadCSV() {
       if (seatAssignment.every(val => val === null)) {
         alert('先に抽選を実行してください。');
         return;
       }
-      let csvContent = "data:text/csv;charset=utf-8,行/列,1列,2列,3列,4列,5列,6列,7列\n";
+      let csvContent = "行/列,1列,2列,3列,4列,5列,6列,7列\n";
       for (let r = 0; r < ROWS; r++) {
         let rowStr = `${r + 1}行`;
         for (let c = 0; c < COLS; c++) {
@@ -1115,13 +1109,19 @@
         }
         csvContent += rowStr + "\n";
       }
-      const encodedUri = encodeURI(csvContent);
+
+      // UTF-8のBOM（\uFEFF）を付与してBlobオブジェクトを生成
+      const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
+      const blob = new Blob([bom, csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+
       const link = document.createElement("a");
-      link.setAttribute("href", encodedUri);
+      link.setAttribute("href", url);
       link.setAttribute("download", `座席表_${new Date().toISOString().slice(0,10)}.csv`);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      URL.revokeObjectURL(url);
     }
   </script>
 </body>
