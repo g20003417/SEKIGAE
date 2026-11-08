@@ -16,8 +16,8 @@
       --danger: #ef4444;
       --danger-hover: #dc2626;
       --success: #10b981;
-      --seat-bg: #334155;
-      --seat-empty: #1e293b;
+      --seat-bg: #1e293b;
+      --seat-empty: #0f172a;
       --board-bg: #064e3b;
       --board-border: #047857;
     }
@@ -41,7 +41,7 @@
 
     header {
       width: 100%;
-      max-width: 900px;
+      max-width: 720px;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -96,7 +96,7 @@
     .btn-gas:hover:not(:disabled) { background-color: #047857; }
 
     .controls {
-      margin-bottom: 24px;
+      margin-bottom: 20px;
       display: flex;
       gap: 12px;
       flex-wrap: wrap;
@@ -105,8 +105,8 @@
     }
 
     .draw-btn {
-      font-size: 1.25rem;
-      padding: 14px 36px;
+      font-size: 1.2rem;
+      padding: 12px 32px;
       background: linear-gradient(135deg, #3b82f6, #8b5cf6);
       box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
     }
@@ -116,22 +116,19 @@
     }
 
     .reset-btn {
-      font-size: 1.1rem;
-      padding: 14px 24px;
+      font-size: 1rem;
+      padding: 12px 20px;
       background-color: #475569;
-    }
-    .reset-btn:hover:not(:disabled) {
-      background-color: #334155;
     }
 
     /* 黒板 / 前方表示 */
     .classroom-container {
       width: 100%;
-      max-width: 900px;
+      max-width: 680px; /* 全体を小さくコンパクトに集約 */
       background-color: var(--card-bg);
       border: 1px solid var(--card-border);
       border-radius: 16px;
-      padding: 24px;
+      padding: 20px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -139,16 +136,16 @@
     }
 
     .blackboard {
-      width: 80%;
+      width: 75%;
       background-color: var(--board-bg);
-      border: 4px solid var(--board-border);
-      border-radius: 8px;
+      border: 3px solid var(--board-border);
+      border-radius: 6px;
       color: #e2e8f0;
       text-align: center;
-      padding: 10px;
+      padding: 8px;
       font-weight: bold;
       letter-spacing: 4px;
-      margin-bottom: 24px;
+      margin-bottom: 16px;
       box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
       position: relative;
     }
@@ -156,32 +153,33 @@
     .blackboard::after {
       content: "▲ スクリーン・黒板（前方） ▲";
       display: block;
-      font-size: 0.75rem;
-      margin-top: 4px;
+      font-size: 0.7rem;
+      margin-top: 2px;
       color: #a7f3d0;
       letter-spacing: 1px;
     }
 
-    /* 座席グリッド (6行x7列) */
+    /* 座席グリッド (6行x7列) - 座席サイズ小型化 */
     .seating-grid {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
-      gap: 12px;
+      gap: 8px;
       width: 100%;
     }
 
+    /* 数字を大きく際立たせる新しい座席スタイル */
     .seat {
-      aspect-ratio: 1.1;
+      aspect-ratio: 1; /* 正方形に近いコンパクトな形状 */
       background-color: var(--seat-bg);
-      border: 2px solid var(--card-border);
-      border-radius: 10px;
+      border: 1.5px solid var(--card-border);
+      border-radius: 8px;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      font-size: 1.4rem;
-      font-weight: 700;
-      color: white;
+      font-size: 1.65rem; /* 数字を大きく強調 */
+      font-weight: 800;
+      color: #94a3b8;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       position: relative;
       user-select: none;
@@ -189,33 +187,37 @@
 
     .seat-coord {
       position: absolute;
-      top: 4px;
-      left: 6px;
-      font-size: 0.65rem;
+      top: 3px;
+      left: 4px;
+      font-size: 0.6rem;
       color: var(--text-sub);
       font-weight: normal;
+      opacity: 0.7;
     }
 
     .seat.empty {
       background-color: var(--seat-empty);
       border-style: dashed;
-      opacity: 0.4;
+      opacity: 0.3;
     }
     .seat.empty::after {
       content: "空席";
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       color: var(--text-sub);
     }
 
+    /* 割り当て完了時の大きな数字デザイン */
     .seat.assigned {
-      background: linear-gradient(135deg, #1d4ed8, #3b82f6);
-      border-color: #60a5fa;
-      box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
-      animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      background: linear-gradient(135deg, #1e3a8a, #2563eb);
+      border: 2px solid #60a5fa;
+      color: #ffffff;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+      animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
     @keyframes popIn {
-      0% { transform: scale(0.8); opacity: 0; }
+      0% { transform: scale(0.7); opacity: 0; }
       100% { transform: scale(1); opacity: 1; }
     }
 
@@ -629,17 +631,21 @@
       openModal('adminModal');
     }
 
+    // 新条件を追加したルール行生成関数
     function addRuleRow(data = { num1: '', num2: '', type: 'not_adjacent' }) {
       const container = document.getElementById('rulesContainer');
       const row = document.createElement('div');
       row.className = 'rule-item';
+      
+      const isSingleNumberRule = (type) => ['front_2rows', 'center_3cols'].includes(type);
+
       row.innerHTML = `
         <span class="rule-text">番号</span>
         <input type="number" class="rule-num1" value="${data.num1}" placeholder="A" min="1">
-        <span class="rule-text">を 番号</span>
-        <input type="number" class="rule-num2" value="${data.num2}" placeholder="B" min="1">
-        <span class="rule-text">の</span>
-        <select class="rule-type">
+        <span class="rule-text target-b-label" style="display: ${isSingleNumberRule(data.type) ? 'none' : 'inline'};">を 番号</span>
+        <input type="number" class="rule-num2" value="${data.num2 || ''}" placeholder="B" min="1" style="display: ${isSingleNumberRule(data.type) ? 'none' : 'inline-block'};">
+        <span class="rule-text">の / を</span>
+        <select class="rule-type" onchange="toggleRuleInputs(this)">
           <option value="not_adjacent" ${data.type === 'not_adjacent' ? 'selected' : ''}>隣り合わない位置（前後左右斜めNG）に配置</option>
           <option value="distance_2" ${data.type === 'distance_2' ? 'selected' : ''}>2席以上離れた位置に配置（全方向）</option>
           <option value="adjacent_side" ${data.type === 'adjacent_side' ? 'selected' : ''}>左右隣（横隣り）に配置</option>
@@ -650,10 +656,29 @@
           <option value="num1_left" ${data.type === 'num1_left' ? 'selected' : ''}>左側に配置 (AがBの左)</option>
           <option value="num1_front" ${data.type === 'num1_front' ? 'selected' : ''}>前側に配置 (AがBの前)</option>
           <option value="num1_back" ${data.type === 'num1_back' ? 'selected' : ''}>後ろ側に配置 (AがBの後ろ)</option>
+          <!-- 新規追加条件 -->
+          <option value="front_2rows" ${data.type === 'front_2rows' ? 'selected' : ''}>前方2列目までに配置（前後の位置）</option>
+          <option value="center_3cols" ${data.type === 'center_3cols' ? 'selected' : ''}>中央の3列に配置（左右の位置）</option>
         </select>
         <button type="button" class="btn btn-danger" style="padding:4px 8px;" onclick="this.parentElement.remove()">&times;</button>
       `;
       container.appendChild(row);
+    }
+
+    // 単一指定ルールの場合に「番号B」の入力欄を非表示にする制御
+    function toggleRuleInputs(selectEl) {
+      const parent = selectEl.parentElement;
+      const num2Input = parent.querySelector('.rule-num2');
+      const labelB = parent.querySelector('.target-b-label');
+      const val = selectEl.value;
+
+      if (['front_2rows', 'center_3cols'].includes(val)) {
+        num2Input.style.display = 'none';
+        if (labelB) labelB.style.display = 'none';
+      } else {
+        num2Input.style.display = 'inline-block';
+        if (labelB) labelB.style.display = 'inline';
+      }
     }
 
     async function saveSettings() {
@@ -677,8 +702,13 @@
         const n1 = parseInt(el.querySelector('.rule-num1').value);
         const n2 = parseInt(el.querySelector('.rule-num2').value);
         const type = el.querySelector('.rule-type').value;
-        if (!isNaN(n1) && !isNaN(n2)) {
-          rules.push({ num1: n1, num2: n2, type });
+
+        if (!isNaN(n1)) {
+          if (['front_2rows', 'center_3cols'].includes(type)) {
+            rules.push({ num1: n1, num2: null, type });
+          } else if (!isNaN(n2)) {
+            rules.push({ num1: n1, num2: n2, type });
+          }
         }
       });
 
@@ -730,7 +760,7 @@
       renderSeats();
     }
 
-    // 根本改善：焼きなまし法 (Simulated Annealing) による超高速ソルバー
+    // 焼きなまし法による超高速抽象ソルバー
     function drawSeats() {
       let students = [];
       for (let i = config.startNum; i <= config.endNum; i++) {
@@ -748,13 +778,12 @@
       }
 
       for (let rule of config.rules) {
-        if (!students.includes(rule.num1) || !students.includes(rule.num2)) {
-          showError(`相性ルールで指定されている番号 (${rule.num1} または ${rule.num2}) が現在の生徒リストに含まれていません。`);
+        if (!students.includes(rule.num1) || (rule.num2 !== null && !students.includes(rule.num2))) {
+          showError(`相性ルールで指定されている番号 (${rule.num1} ${rule.num2 ? 'または '+rule.num2 : ''}) が現在の生徒リストに含まれていません。`);
           return;
         }
       }
 
-      // 画面更新を挟んで即座に実行（フリーズゼロ）
       const drawBtn = document.getElementById('drawBtn');
       drawBtn.disabled = true;
       drawBtn.innerText = "抽選中...";
@@ -775,7 +804,7 @@
       }, 30);
     }
 
-    // ペナルティ評価関数 (違約数をカウント)
+    // ペナルティ計算（追加された新条件の判定を反映）
     function calculatePenalty(grid, rules) {
       let posMap = new Map();
       for (let i = 0; i < grid.length; i++) {
@@ -784,34 +813,46 @@
 
       let penalty = 0;
       for (let rule of rules) {
-        if (posMap.has(rule.num1) && posMap.has(rule.num2)) {
+        if (posMap.has(rule.num1)) {
           const p1 = posMap.get(rule.num1);
-          const p2 = posMap.get(rule.num2);
           const r1 = Math.floor(p1 / COLS), c1 = p1 % COLS;
-          const r2 = Math.floor(p2 / COLS), c2 = p2 % COLS;
 
-          const dr = Math.abs(r1 - r2);
-          const dc = Math.abs(c1 - c2);
+          // 単一の生徒指定ルール
+          if (rule.type === 'front_2rows') {
+            if (r1 >= 2) penalty++; // 前方2列目＝0行目または1行目以外はペナルティ
+            continue;
+          }
+          if (rule.type === 'center_3cols') {
+            if (c1 < 2 || c1 > 4) penalty++; // 中央3列＝2,3,4列目 (0オリジンで3,4,5列目) 以外はペナルティ
+            continue;
+          }
 
-          if (rule.type === 'not_adjacent' && dr <= 1 && dc <= 1) penalty++;
-          else if (rule.type === 'distance_2' && dr <= 2 && dc <= 2) penalty++;
-          else if (rule.type === 'adjacent_side' && (dr !== 0 || dc !== 1)) penalty++;
-          else if (rule.type === 'adjacent_any' && dr + dc !== 1) penalty++;
-          else if (rule.type === 'num1_side_dist2' && dc < 3) penalty++;
-          else if (rule.type === 'num1_vert_dist2' && dr < 3) penalty++;
-          else if (rule.type === 'num1_right' && c1 <= c2) penalty++;
-          else if (rule.type === 'num1_left' && c1 >= c2) penalty++;
-          else if (rule.type === 'num1_front' && r1 >= r2) penalty++;
-          else if (rule.type === 'num1_back' && r1 <= r2) penalty++;
+          // 2人の生徒の組み合わせルール
+          if (posMap.has(rule.num2)) {
+            const p2 = posMap.get(rule.num2);
+            const r2 = Math.floor(p2 / COLS), c2 = p2 % COLS;
+
+            const dr = Math.abs(r1 - r2);
+            const dc = Math.abs(c1 - c2);
+
+            if (rule.type === 'not_adjacent' && dr <= 1 && dc <= 1) penalty++;
+            else if (rule.type === 'distance_2' && dr <= 2 && dc <= 2) penalty++;
+            else if (rule.type === 'adjacent_side' && (dr !== 0 || dc !== 1)) penalty++;
+            else if (rule.type === 'adjacent_any' && dr + dc !== 1) penalty++;
+            else if (rule.type === 'num1_side_dist2' && dc < 3) penalty++;
+            else if (rule.type === 'num1_vert_dist2' && dr < 3) penalty++;
+            else if (rule.type === 'num1_right' && c1 <= c2) penalty++;
+            else if (rule.type === 'num1_left' && c1 >= c2) penalty++;
+            else if (rule.type === 'num1_front' && r1 >= r2) penalty++;
+            else if (rule.type === 'num1_back' && r1 <= r2) penalty++;
+          }
         }
       }
       return penalty;
     }
 
-    // メタヒューリスティクス：最適化ソルバー
     function solveBySimulatedAnnealing(students, availableSeats, rules) {
-      // 複数回試行（リスタート）を行って確実性をアップ
-      for (let attempt = 0; attempt < 15; attempt++) {
+      for (let attempt = 0; attempt < 20; attempt++) {
         let grid = new Array(TOTAL_SEATS).fill(null);
         let shuffledStudents = [...students].sort(() => Math.random() - 0.5);
         let shuffledSeats = [...availableSeats].sort(() => Math.random() - 0.5);
@@ -826,13 +867,10 @@
         let temp = 100.0;
         let coolingRate = 0.995;
 
-        // 制限回数ループ (最大5,000ステップ) -> フリーズは100%発生しない
         for (let step = 0; step < 5000; step++) {
-          // ランダムに2つの席を選んで生徒を入れ替え
           let idxA = shuffledSeats[Math.floor(Math.random() * shuffledSeats.length)];
           let idxB = shuffledSeats[Math.floor(Math.random() * shuffledSeats.length)];
 
-          // Swap
           let tempStudent = grid[idxA];
           grid[idxA] = grid[idxB];
           grid[idxB] = tempStudent;
@@ -841,12 +879,10 @@
 
           if (newPenalty === 0) return grid;
 
-          // ペナルティが減ったら採用、増えた場合は確率的に採用
           let delta = newPenalty - currentPenalty;
           if (delta < 0 || Math.exp(-delta / temp) > Math.random()) {
             currentPenalty = newPenalty;
           } else {
-            // 元に戻す
             let revert = grid[idxA];
             grid[idxA] = grid[idxB];
             grid[idxB] = revert;
