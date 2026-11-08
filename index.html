@@ -73,22 +73,27 @@
       font-size: 0.95rem;
     }
 
-    .btn:hover {
+    .btn:hover:not(:disabled) {
       background-color: var(--primary-hover);
       transform: translateY(-1px);
     }
 
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
     .btn-secondary { background-color: #475569; }
-    .btn-secondary:hover { background-color: #334155; }
+    .btn-secondary:hover:not(:disabled) { background-color: #334155; }
 
     .btn-danger { background-color: var(--danger); }
-    .btn-danger:hover { background-color: var(--danger-hover); }
+    .btn-danger:hover:not(:disabled) { background-color: var(--danger-hover); }
 
     .btn-success { background-color: var(--success); }
-    .btn-success:hover { background-color: #059669; }
+    .btn-success:hover:not(:disabled) { background-color: #059669; }
 
     .btn-gas { background-color: #059669; }
-    .btn-gas:hover { background-color: #047857; }
+    .btn-gas:hover:not(:disabled) { background-color: #047857; }
 
     .controls {
       margin-bottom: 24px;
@@ -105,18 +110,17 @@
       background: linear-gradient(135deg, #3b82f6, #8b5cf6);
       box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
     }
-    .draw-btn:hover {
+    .draw-btn:hover:not(:disabled) {
       box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6);
       transform: translateY(-2px);
     }
 
-    /* リセットボタン専用スタイル */
     .reset-btn {
       font-size: 1.1rem;
       padding: 14px 24px;
       background-color: #475569;
     }
-    .reset-btn:hover {
+    .reset-btn:hover:not(:disabled) {
       background-color: #334155;
     }
 
@@ -274,10 +278,7 @@
     .close-btn:hover { color: white; }
 
     /* フォームスタイル */
-    .form-group {
-      margin-bottom: 20px;
-    }
-
+    .form-group { margin-bottom: 20px; }
     .form-label {
       display: block;
       font-size: 0.9rem;
@@ -285,7 +286,6 @@
       margin-bottom: 8px;
       color: #e2e8f0;
     }
-
     .form-input, .form-select {
       width: 100%;
       padding: 10px;
@@ -295,15 +295,8 @@
       color: white;
       font-size: 0.95rem;
     }
-
-    .form-row {
-      display: flex;
-      gap: 12px;
-    }
-
-    .form-row .form-group {
-      flex: 1;
-    }
+    .form-row { display: flex; gap: 12px; }
+    .form-row .form-group { flex: 1; }
 
     /* 空席ミニグリッド */
     .mini-grid {
@@ -312,7 +305,6 @@
       gap: 6px;
       margin-top: 8px;
     }
-
     .mini-seat {
       aspect-ratio: 1;
       background-color: #334155;
@@ -325,7 +317,6 @@
       user-select: none;
       border: 1px solid transparent;
     }
-
     .mini-seat.is-empty {
       background-color: #1e293b;
       color: #64748b;
@@ -345,7 +336,6 @@
       border: 1px solid var(--card-border);
       flex-wrap: wrap;
     }
-
     .rule-item select, .rule-item input {
       padding: 6px 8px;
       background-color: #1e293b;
@@ -353,20 +343,9 @@
       color: white;
       border-radius: 4px;
     }
-
-    .rule-item input[type="number"] {
-      width: 65px;
-    }
-
-    .rule-item select {
-      flex: 1;
-      min-width: 180px;
-    }
-
-    .rule-text {
-      font-size: 0.85rem;
-      color: var(--text-sub);
-    }
+    .rule-item input[type="number"] { width: 65px; }
+    .rule-item select { flex: 1; min-width: 180px; }
+    .rule-text { font-size: 0.85rem; color: var(--text-sub); }
 
     /* エラーモーダル用 */
     .error-box {
@@ -379,53 +358,15 @@
       line-height: 1.6;
     }
 
-    code, pre {
-      font-family: monospace;
-      background: #0f172a;
-      padding: 4px 8px;
-      border-radius: 4px;
-      color: #38bdf8;
-    }
-
-    pre {
-      padding: 12px;
-      overflow-x: auto;
-      white-space: pre-wrap;
-      word-break: break-all;
-    }
-
     /* 印刷スタイル */
     @media print {
-      body {
-        background-color: white !important;
-        color: black !important;
-        padding: 0;
-      }
-      header, .controls, .modal-overlay, .btn {
-        display: none !important;
-      }
-      .classroom-container {
-        border: none !important;
-        box-shadow: none !important;
-        width: 100% !important;
-        max-width: 100% !important;
-        padding: 0 !important;
-      }
-      .blackboard {
-        background-color: #f1f5f9 !important;
-        color: black !important;
-        border: 2px solid black !important;
-      }
+      body { background-color: white !important; color: black !important; padding: 0; }
+      header, .controls, .modal-overlay, .btn { display: none !important; }
+      .classroom-container { border: none !important; box-shadow: none !important; width: 100% !important; max-width: 100% !important; padding: 0 !important; }
+      .blackboard { background-color: #f1f5f9 !important; color: black !important; border: 2px solid black !important; }
       .blackboard::after { color: #475569 !important; }
-      .seat {
-        background: white !important;
-        color: black !important;
-        border: 2px solid black !important;
-      }
-      .seat.empty {
-        background: #f8fafc !important;
-        border-style: dashed !important;
-      }
+      .seat { background: white !important; color: black !important; border: 2px solid black !important; }
+      .seat.empty { background: #f8fafc !important; border-style: dashed !important; }
       .seat-coord { color: #64748b !important; }
     }
   </style>
@@ -441,9 +382,8 @@
   </header>
 
   <div class="controls">
-    <button class="btn draw-btn" onclick="drawSeats()">抽選スタート！</button>
-    <!-- リセットボタン追加 -->
-    <button class="btn reset-btn" onclick="resetSeats()">リセット</button>
+    <button class="btn draw-btn" id="drawBtn" onclick="drawSeats()">抽選スタート！</button>
+    <button class="btn reset-btn" id="resetBtn" onclick="resetSeats()">リセット</button>
     <button class="btn btn-success" onclick="downloadCSV()">CSV保存</button>
     <button class="btn btn-secondary" onclick="window.print()">印刷</button>
   </div>
@@ -553,15 +493,76 @@
         <input type="url" id="gasUrlInput" class="form-input" placeholder="https://script.google.com/macros/s/.../exec">
       </div>
       <button class="btn btn-success" style="width:100%; margin-bottom:16px;" onclick="saveGasUrl()">URLを保存</button>
-
-      <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom:8px;">
-        ※GAS連携を行うと、パスワード変更が全端末へ自動同期され、過去の全配置データがスプレッドシートへ自動保存されます。
-      </p>
       <div style="text-align: right; margin-top:16px;">
         <button class="btn btn-secondary" onclick="closeModal('gasModal')">閉じる</button>
       </div>
     </div>
   </div>
+
+  <!-- Web Worker スクリプト定義（Blob化用） -->
+  <script id="workerCode" type="javascript/worker">
+    self.onmessage = function(e) {
+      const { students, availableSeats, rules, ROWS, COLS, TOTAL_SEATS } = e.data;
+      
+      // バックトラッキング探索処理
+      let grid = new Array(TOTAL_SEATS).fill(null);
+      let posMap = new Map();
+      let steps = 0;
+      const maxSteps = 300000; // 最大探索ステップ数
+
+      function backtrack(index) {
+        steps++;
+        if (steps > maxSteps) return false;
+        if (index === students.length) return true;
+
+        const student = students[index];
+
+        for (let seatIdx of availableSeats) {
+          if (grid[seatIdx] !== null) continue;
+
+          grid[seatIdx] = student;
+          posMap.set(student, seatIdx);
+
+          if (checkPartialRules(posMap, rules, COLS)) {
+            if (backtrack(index + 1)) return true;
+          }
+
+          grid[seatIdx] = null;
+          posMap.delete(student);
+        }
+        return false;
+      }
+
+      function checkPartialRules(posMap, rules, COLS) {
+        for (let rule of rules) {
+          if (posMap.has(rule.num1) && posMap.has(rule.num2)) {
+            const p1 = posMap.get(rule.num1);
+            const p2 = posMap.get(rule.num2);
+            const r1 = Math.floor(p1 / COLS), c1 = p1 % COLS;
+            const r2 = Math.floor(p2 / COLS), c2 = p2 % COLS;
+
+            const dr = Math.abs(r1 - r2);
+            const dc = Math.abs(c1 - c2);
+
+            if (rule.type === 'not_adjacent' && dr <= 1 && dc <= 1) return false;
+            if (rule.type === 'distance_2' && dr <= 2 && dc <= 2) return false;
+            if (rule.type === 'adjacent_side' && (dr !== 0 || dc !== 1)) return false;
+            if (rule.type === 'adjacent_any' && dr + dc !== 1) return false;
+            if (rule.type === 'num1_side_dist2' && dc < 3) return false;
+            if (rule.type === 'num1_vert_dist2' && dr < 3) return false;
+            if (rule.type === 'num1_right' && c1 <= c2) return false;
+            if (rule.type === 'num1_left' && c1 >= c2) return false;
+            if (rule.type === 'num1_front' && r1 >= r2) return false;
+            if (rule.type === 'num1_back' && r1 <= r2) return false;
+          }
+        }
+        return true;
+      }
+
+      const success = backtrack(0);
+      self.postMessage({ success: success, solution: success ? grid : null });
+    };
+  </script>
 
   <script>
     const ROWS = 6;
@@ -659,7 +660,7 @@
           }
         } catch (err) {
           loginBtn.innerText = "ログイン";
-          alert('GASとの通信に失敗しました。オフライン初期パスワード（skg42）で試行します。');
+          alert('GAS通信失敗。初期パスワード（skg42）で照合します。');
           if (pwdInput === "skg42") {
             currentAuthedPassword = pwdInput;
             closeModal('authModal');
@@ -699,238 +700,10 @@
       row.className = 'rule-item';
       row.innerHTML = `
         <span class="rule-text">番号</span>
-        <input type="number" class="rule-num1" value="${data.num1}" placeholder="A" min="1">
+        <input type="number" class="rule-num1" value="\${data.num1}" placeholder="A" min="1">
         <span class="rule-text">を 番号</span>
-        <input type="number" class="rule-num2" value="${data.num2}" placeholder="B" min="1">
+        <input type="number" class="rule-num2" value="\${data.num2}" placeholder="B" min="1">
         <span class="rule-text">の</span>
         <select class="rule-type">
-          <option value="not_adjacent" ${data.type === 'not_adjacent' ? 'selected' : ''}>隣り合わない位置（前後左右斜めNG）に配置</option>
-          <option value="distance_2" ${data.type === 'distance_2' ? 'selected' : ''}>2席以上離れた位置に配置（全方向）</option>
-          <option value="adjacent_side" ${data.type === 'adjacent_side' ? 'selected' : ''}>左右隣（横隣り）に配置</option>
-          <option value="adjacent_any" ${data.type === 'adjacent_any' ? 'selected' : ''}>前後左右で隣り合う位置に配置</option>
-          <option value="num1_side_dist2" ${data.type === 'num1_side_dist2' ? 'selected' : ''}>横（列）に2列以上間をあける</option>
-          <option value="num1_vert_dist2" ${data.type === 'num1_vert_dist2' ? 'selected' : ''}>縦（行）に2行以上間をあける</option>
-          <option value="num1_right" ${data.type === 'num1_right' ? 'selected' : ''}>右側に配置 (AがBの右)</option>
-          <option value="num1_left" ${data.type === 'num1_left' ? 'selected' : ''}>左側に配置 (AがBの左)</option>
-          <option value="num1_front" ${data.type === 'num1_front' ? 'selected' : ''}>前側に配置 (AがBの前)</option>
-          <option value="num1_back" ${data.type === 'num1_back' ? 'selected' : ''}>後ろ側に配置 (AがBの後ろ)</option>
-        </select>
-        <button type="button" class="btn btn-danger" style="padding:4px 8px;" onclick="this.parentElement.remove()">&times;</button>
-      `;
-      container.appendChild(row);
-    }
-
-    async function saveSettings() {
-      const start = parseInt(document.getElementById('startNum').value) || 1;
-      const end = parseInt(document.getElementById('endNum').value) || 1;
-      
-      if (start > end) {
-        alert('開始番号は終了番号以下にしてください。');
-        return;
-      }
-
-      const missingStr = document.getElementById('missingNums').value.trim();
-      let missingArr = missingStr ? missingStr.split(/[\s,、]+/) : [];
-      missingArr = missingArr.map(n => parseInt(n)).filter(n => !isNaN(n) && n >= start && n <= end);
-      missingArr = [...new Set(missingArr)];
-      if (missingArr.length > 41) missingArr = missingArr.slice(0, 41);
-
-      const ruleElements = document.querySelectorAll('.rule-item');
-      const rules = [];
-      ruleElements.forEach(el => {
-        const n1 = parseInt(el.querySelector('.rule-num1').value);
-        const n2 = parseInt(el.querySelector('.rule-num2').value);
-        const type = el.querySelector('.rule-type').value;
-        if (!isNaN(n1) && !isNaN(n2)) {
-          rules.push({ num1: n1, num2: n2, type });
-        }
-      });
-
-      const newPwd = document.getElementById('newPassword').value.trim();
-      const gasUrl = localStorage.getItem('gas_app_url');
-
-      if (newPwd) {
-        if (gasUrl) {
-          try {
-            const res = await fetch(gasUrl, {
-              method: 'POST',
-              body: JSON.stringify({ action: 'changePassword', currentPassword: currentAuthedPassword, newPassword: newPwd })
-            });
-            const json = await res.json();
-            if (json.success) {
-              alert('全端末共通のパスワードを更新しました。');
-              currentAuthedPassword = newPwd;
-            } else {
-              alert('パスワード更新エラー: ' + json.message);
-            }
-          } catch(err) {
-            alert('GAS通信エラーのためパスワードは更新されませんでした。');
-          }
-        } else {
-          alert('※GAS WebアプリURLが未登録のため、パスワード同期機能は無効です。「GAS連携設定」からURLを登録してください。');
-        }
-      }
-
-      config.startNum = start;
-      config.endNum = end;
-      config.missingNums = missingArr;
-      config.rules = rules;
-
-      closeModal('adminModal');
-      renderSeats();
-    }
-
-    function openGasModal() { openModal('gasModal'); }
-
-    function saveGasUrl() {
-      const url = document.getElementById('gasUrlInput').value.trim();
-      localStorage.setItem('gas_app_url', url);
-      alert('GAS URLを保存しました。全端末のパスワード更新機能が有効になりました。');
-      closeModal('gasModal');
-    }
-
-    // 座席配置のリセット処理
-    function resetSeats() {
-      seatAssignment = new Array(TOTAL_SEATS).fill(null);
-      renderSeats();
-    }
-
-    function drawSeats() {
-      let students = [];
-      for (let i = config.startNum; i <= config.endNum; i++) {
-        if (!config.missingNums.includes(i)) students.push(i);
-      }
-
-      let availableSeats = [];
-      for (let i = 0; i < TOTAL_SEATS; i++) {
-        if (!config.emptySeats[i]) availableSeats.push(i);
-      }
-
-      if (students.length > availableSeats.length) {
-        showError(`生徒数 (${students.length}名) が利用可能な席数 (${availableSeats.length}席) を超えています。`);
-        return;
-      }
-
-      for (let rule of config.rules) {
-        if (!students.includes(rule.num1) || !students.includes(rule.num2)) {
-          showError(`相性ルールで指定されている番号 (${rule.num1} または ${rule.num2}) が現在の生徒リストに含まれていません。`);
-          return;
-        }
-      }
-
-      students.sort(() => Math.random() - 0.5);
-
-      let solution = solveSeating(students, availableSeats, config.rules);
-
-      if (solution) {
-        seatAssignment = solution;
-        renderSeats();
-        sendResultToGAS(solution);
-      } else {
-        showError("条件が厳しすぎるか矛盾しているため、すべての条件を満たす座席配置が存在しません。管理画面で設定を見直してください。");
-      }
-    }
-
-    async function sendResultToGAS(solution) {
-      const gasUrl = localStorage.getItem('gas_app_url');
-      if (!gasUrl) return;
-      try {
-        await fetch(gasUrl, {
-          method: 'POST',
-          body: JSON.stringify({ action: 'saveResult', result: solution })
-        });
-      } catch (e) {
-        console.error("GAS保存エラー:", e);
-      }
-    }
-
-    function showError(msg) {
-      document.getElementById('errorMessage').innerText = msg;
-      openModal('errorModal');
-    }
-
-    function solveSeating(students, availableSeats, rules) {
-      let grid = new Array(TOTAL_SEATS).fill(null);
-      let posMap = new Map();
-
-      function backtrack(index) {
-        if (index === students.length) return true;
-
-        const student = students[index];
-
-        for (let seatIdx of availableSeats) {
-          if (grid[seatIdx] !== null) continue;
-
-          grid[seatIdx] = student;
-          posMap.set(student, seatIdx);
-
-          if (checkPartialRules(posMap, rules)) {
-            if (backtrack(index + 1)) return true;
-          }
-
-          grid[seatIdx] = null;
-          posMap.delete(student);
-        }
-        return false;
-      }
-
-      if (backtrack(0)) return grid;
-      return null;
-    }
-
-    function checkPartialRules(posMap, rules) {
-      for (let rule of rules) {
-        if (posMap.has(rule.num1) && posMap.has(rule.num2)) {
-          const p1 = posMap.get(rule.num1);
-          const p2 = posMap.get(rule.num2);
-          const r1 = Math.floor(p1 / COLS), c1 = p1 % COLS;
-          const r2 = Math.floor(p2 / COLS), c2 = p2 % COLS;
-
-          const dr = Math.abs(r1 - r2);
-          const dc = Math.abs(c1 - c2);
-
-          if (rule.type === 'not_adjacent' && dr <= 1 && dc <= 1) return false;
-          if (rule.type === 'distance_2' && dr <= 2 && dc <= 2) return false;
-          if (rule.type === 'adjacent_side' && (dr !== 0 || dc !== 1)) return false;
-          if (rule.type === 'adjacent_any' && dr + dc !== 1) return false;
-
-          // 横（列）に2列以上あける (間が2列以上ある＝列差が3以上)
-          if (rule.type === 'num1_side_dist2' && dc < 3) return false;
-          // 縦（行）に2行以上あける (間が2行以上ある＝行差が3以上)
-          if (rule.type === 'num1_vert_dist2' && dr < 3) return false;
-
-          if (rule.type === 'num1_right' && c1 <= c2) return false;
-          if (rule.type === 'num1_left' && c1 >= c2) return false;
-          if (rule.type === 'num1_front' && r1 >= r2) return false;
-          if (rule.type === 'num1_back' && r1 <= r2) return false;
-        }
-      }
-      return true;
-    }
-
-    function downloadCSV() {
-      if (seatAssignment.every(val => val === null)) {
-        alert('先に抽選を実行してください。');
-        return;
-      }
-      let csvContent = "data:text/csv;charset=utf-8,行/列,1列,2列,3列,4列,5列,6列,7列\n";
-      for (let r = 0; r < ROWS; r++) {
-        let rowStr = `${r + 1}行`;
-        for (let c = 0; c < COLS; c++) {
-          let idx = r * COLS + c;
-          let val = config.emptySeats[idx] ? "空席" : (seatAssignment[idx] || "");
-          rowStr += `,${val}`;
-        }
-        csvContent += rowStr + "\n";
-      }
-      const encodedUri = encodeURI(csvContent);
-      const link = document.createElement("a");
-      link.setAttribute("href", encodedUri);
-      link.setAttribute("download", `座席表_${new Date().toISOString().slice(0,10)}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
-  </script>
-</body>
-</html>
+          <option value="not_adjacent" \${data.type === 'not_adjacent' ? 'selected' : ''}>隣り合わない位置（前後左右斜めNG）に配置</option>
+          <option value="distance_2" \${data.type === 'distance_2' ? 'selected' : ''}>2席以上離れた位置に配置（全
