@@ -348,6 +348,22 @@
     .rule-item input[type="number"] { width: 65px; }
     .rule-item select { flex: 1; min-width: 180px; }
     .rule-text { font-size: 0.85rem; color: var(--text-sub); }
+    
+    .rule-actions {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+    }
+    .btn-move {
+      padding: 4px 8px;
+      font-size: 0.75rem;
+      background-color: #334155;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .btn-move:hover { background-color: #475569; }
 
     .error-box {
       background-color: rgba(239, 68, 68, 0.1);
@@ -526,12 +542,13 @@
 
     let seatAssignment = new Array(TOTAL_SEATS).fill(null);
 
+    // 単一番号指定ルールの識別判定リスト（not_first_rowを追加）
     const SINGLE_NUMBER_RULES = [
       'front_2rows', 'front_3rows', 
       'center_3cols', 'center_5cols', 
       'left_2cols', 'left_3cols', 
       'right_2cols', 'right_3cols', 
-      'not_last_row'
+      'not_first_row', 'not_last_row'
     ];
 
     window.addEventListener('DOMContentLoaded', () => {
@@ -541,14 +558,10 @@
       document.getElementById('gasUrlInput').value = savedGasUrl;
     });
 
-    // --------------------------------------------------
-    // 【根本改善】GAS通信専用の完全リダイレクト吸収関数
-    // --------------------------------------------------
     async function sendToGas(url, payload) {
-      // GASのPOST通信を確実に追従・解釈する処理
       const response = await fetch(url, {
         method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // CORSを回避するtext/plain送信
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify(payload),
         redirect: 'follow'
       });
@@ -557,7 +570,6 @@
       try {
         return JSON.parse(text);
       } catch(e) {
-        // 万が一HTML等が返ってきた場合でも通信成功として判定
         return { success: true, rawText: text };
       }
     }
@@ -665,6 +677,7 @@
       openModal('adminModal');
     }
 
+    // 上へ・下へ移動付きの条件選択肢生成関数
     function addRuleRow(data = { num1: '', num2: '', type: 'not_adjacent' }) {
       const container = document.getElementById('rulesContainer');
       const row = document.createElement('div');
@@ -689,6 +702,7 @@
           <option value="num1_left" ${data.type === 'num1_left' ? 'selected' : ''}>左側に配置 (AがBの左)</option>
           <option value="num1_front" ${data.type === 'num1_front' ? 'selected' : ''}>前側に配置 (AがBの前)</option>
           <option value="num1_back" ${data.type === 'num1_back' ? 'selected' : ''}>後ろ側に配置 (AがBの後ろ)</option>
+          <!-- 位置指定系ルール -->
           <option value="front_2rows" ${data.type === 'front_2rows' ? 'selected' : ''}>前方2行目までに配置（前後の位置）</option>
           <option value="front_3rows" ${data.type === 'front_3rows' ? 'selected' : ''}>前方3行目までに配置（前後の位置）</option>
           <option value="center_3cols" ${data.type === 'center_3cols' ? 'selected' : ''}>中央3列に配置（左右の位置）</option>
@@ -697,11 +711,26 @@
           <option value="left_3cols" ${data.type === 'left_3cols' ? 'selected' : ''}>左側の3列に配置（左右の位置）</option>
           <option value="right_2cols" ${data.type === 'right_2cols' ? 'selected' : ''}>右側の2列に配置（左右の位置）</option>
           <option value="right_3cols" ${data.type === 'right_3cols' ? 'selected' : ''}>右側の3列に配置（左右の位置）</option>
+          <option value="not_first_row" ${data.type === 'not_first_row' ? 'selected' : ''}>最前列にしない（前が空席の場合も不可）</option>
           <option value="not_last_row" ${data.type === 'not_last_row' ? 'selected' : ''}>一番後ろにしない（後ろが空席の場合も不可）</option>
         </select>
-        <button type="button" class="btn btn-danger" style="padding:4px 8px;" onclick="this.parentElement.remove()">&times;</button>
+        <div class="rule-actions">
+          <button type="button" class="btn-move" onclick="moveRuleRow(this, -1)">▲</button>
+          <button type="button" class="btn-move" onclick="moveRuleRow(this, 1)">▼</button>
+          <button type="button" class="btn btn-danger" style="padding:4px 8px;" onclick="this.parentElement.parentElement.remove()">&times;</button>
+        </div>
       `;
       container.appendChild(row);
+    }
+
+    // 行並べ替え処理
+    function moveRuleRow(btn, direction) {
+      const row = btn.closest('.rule-item');
+      if (direction === -1 && row.previousElementSibling) {
+        row.parentNode.insertBefore(row, row.previousElementSibling);
+      } else if (direction === 1 && row.nextElementSibling) {
+        row.parentNode.insertBefore(row.nextElementSibling, row);
+      }
     }
 
     function toggleRuleInputs(selectEl) {
@@ -808,9 +837,6 @@
       }
     }
 
-    // --------------------------------------------------
-    // 修正済み：プリセット保存処理
-    // --------------------------------------------------
     async function savePreset() {
       const name = document.getElementById('presetNameInput').value.trim();
       if (!name) {
@@ -949,6 +975,7 @@
       }, 30);
     }
 
+    // 「最前列にしない」ペナルティ判定ロジックを含む計算関数
     function calculatePenalty(grid, rules) {
       let posMap = new Map();
       for (let i = 0; i < grid.length; i++) {
@@ -969,7 +996,19 @@
           else if (rule.type === 'left_3cols' && c1 >= 3) penalty++;
           else if (rule.type === 'right_2cols' && c1 < 5) penalty++;
           else if (rule.type === 'right_3cols' && c1 < 4) penalty++;
+          else if (rule.type === 'not_first_row') {
+            // 1行目か、直前（同じ列の1行上）が空席の場合はNG
+            if (r1 === 0) {
+              penalty++;
+            } else {
+              const frontIdx = (r1 - 1) * COLS + c1;
+              if (config.emptySeats[frontIdx]) {
+                penalty++;
+              }
+            }
+          }
           else if (rule.type === 'not_last_row') {
+            // 最最終行か、直後（同じ列の1行下）が空席の場合はNG
             if (r1 === ROWS - 1) {
               penalty++;
             } else {
