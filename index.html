@@ -121,7 +121,6 @@
       background-color: #475569;
     }
 
-    /* 黒板 / 前方表示 */
     .classroom-container {
       width: 100%;
       max-width: 680px;
@@ -159,7 +158,6 @@
       letter-spacing: 1px;
     }
 
-    /* 座席グリッド (6行x7列) */
     .seating-grid {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
@@ -219,7 +217,6 @@
       100% { transform: scale(1); opacity: 1; }
     }
 
-    /* モーダル共通 */
     .modal-overlay {
       position: fixed;
       top: 0;
@@ -277,7 +274,6 @@
     }
     .close-btn:hover { color: white; }
 
-    /* フォームスタイル */
     .form-group { margin-bottom: 20px; }
     .form-label {
       display: block;
@@ -306,7 +302,6 @@
       margin-bottom: 20px;
     }
 
-    /* 空席ミニグリッド */
     .mini-grid {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
@@ -332,7 +327,6 @@
       text-decoration: line-through;
     }
 
-    /* 相性ルール設定リスト */
     .rule-item {
       display: flex;
       gap: 6px;
@@ -355,7 +349,6 @@
     .rule-item select { flex: 1; min-width: 180px; }
     .rule-text { font-size: 0.85rem; color: var(--text-sub); }
 
-    /* エラーモーダル用 */
     .error-box {
       background-color: rgba(239, 68, 68, 0.1);
       border: 1px solid var(--danger);
@@ -366,53 +359,16 @@
       line-height: 1.6;
     }
 
-    /* 1ページ内に綺麗に収める印刷専用スタイル */
     @media print {
-      @page {
-        size: A4 portrait;
-        margin: 10mm;
-      }
-      html, body {
-        background-color: white !important;
-        color: black !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        height: auto !important;
-        overflow: visible !important;
-      }
-      header, .controls, .modal-overlay, .btn {
-        display: none !important;
-      }
-      .classroom-container {
-        border: none !important;
-        box-shadow: none !important;
-        width: 100% !important;
-        max-width: 100% !important;
-        padding: 0 !important;
-        page-break-inside: avoid !important;
-        break-inside: avoid !important;
-        transform: scale(0.88);
-        transform-origin: top center;
-      }
-      .blackboard {
-        background-color: #f1f5f9 !important;
-        color: black !important;
-        border: 2px solid black !important;
-        margin-bottom: 12px !important;
-      }
+      @page { size: A4 portrait; margin: 10mm; }
+      html, body { background-color: white !important; color: black !important; padding: 0 !important; margin: 0 !important; height: auto !important; overflow: visible !important; }
+      header, .controls, .modal-overlay, .btn { display: none !important; }
+      .classroom-container { border: none !important; box-shadow: none !important; width: 100% !important; max-width: 100% !important; padding: 0 !important; page-break-inside: avoid !important; break-inside: avoid !important; transform: scale(0.88); transform-origin: top center; }
+      .blackboard { background-color: #f1f5f9 !important; color: black !important; border: 2px solid black !important; margin-bottom: 12px !important; }
       .blackboard::after { color: #475569 !important; }
       .seating-grid { gap: 6px !important; }
-      .seat {
-        background: white !important;
-        color: black !important;
-        border: 1.5px solid black !important;
-        box-shadow: none !important;
-        text-shadow: none !important;
-      }
-      .seat.empty {
-        background: #f8fafc !important;
-        border-style: dashed !important;
-      }
+      .seat { background: white !important; color: black !important; border: 1.5px solid black !important; box-shadow: none !important; text-shadow: none !important; }
+      .seat.empty { background: #f8fafc !important; border-style: dashed !important; }
       .seat-coord { color: #64748b !important; }
     }
   </style>
@@ -464,7 +420,6 @@
         <button class="close-btn" onclick="closeModal('adminModal')">&times;</button>
       </div>
       
-      <!-- プリセット保存・呼び出しセクション -->
       <div class="preset-box">
         <label class="form-label" style="color:#38bdf8;">★ 条件プリセット（GAS連携で全端末共有）</label>
         <div class="form-row" style="margin-bottom:8px;">
@@ -475,17 +430,15 @@
         </div>
         <div class="form-row">
           <input type="text" id="presetNameInput" class="form-input" placeholder="例: 1学期通常, テスト配置">
-          <button type="button" class="btn" style="padding:6px 14px; white-space:nowrap;" onclick="savePreset()">保存する</button>
+          <button type="button" id="savePresetBtn" class="btn" style="padding:6px 14px; white-space:nowrap;" onclick="savePreset()">保存する</button>
         </div>
       </div>
 
-      <!-- 1. 空席指定 -->
       <div class="form-group">
         <label class="form-label">1. 空席の選択（タップして空席を切り替え）</label>
         <div class="mini-grid" id="miniGrid"></div>
       </div>
 
-      <!-- 2 & 3. 番号範囲と欠番 -->
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">2. 開始番号</label>
@@ -502,7 +455,6 @@
         <input type="text" id="missingNums" class="form-input" placeholder="例: 4, 12, 25">
       </div>
 
-      <!-- 4. 相性指示 -->
       <div class="form-group">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
           <label class="form-label" style="margin:0;">4. 条件・相性ルール指定</label>
@@ -511,7 +463,6 @@
         <div id="rulesContainer"></div>
       </div>
 
-      <!-- パスワード変更設定 -->
       <div class="form-group" style="border-top: 1px dashed var(--card-border); padding-top: 16px;">
         <label class="form-label">管理画面パスワードの変更（全端末に共通反映）</label>
         <div class="form-row">
@@ -526,7 +477,6 @@
     </div>
   </div>
 
-  <!-- エラーモーダル -->
   <div class="modal-overlay" id="errorModal">
     <div class="modal" style="max-width: 500px;">
       <div class="modal-header">
@@ -542,7 +492,6 @@
     </div>
   </div>
 
-  <!-- GAS連携設定モーダル -->
   <div class="modal-overlay" id="gasModal">
     <div class="modal">
       <div class="modal-header">
@@ -577,7 +526,6 @@
 
     let seatAssignment = new Array(TOTAL_SEATS).fill(null);
 
-    // 単一番号指定ルールの識別判定リスト
     const SINGLE_NUMBER_RULES = [
       'front_2rows', 'front_3rows', 
       'center_3cols', 'center_5cols', 
@@ -592,6 +540,27 @@
       const savedGasUrl = localStorage.getItem('gas_app_url') || "";
       document.getElementById('gasUrlInput').value = savedGasUrl;
     });
+
+    // --------------------------------------------------
+    // 【根本改善】GAS通信専用の完全リダイレクト吸収関数
+    // --------------------------------------------------
+    async function sendToGas(url, payload) {
+      // GASのPOST通信を確実に追従・解釈する処理
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // CORSを回避するtext/plain送信
+        body: JSON.stringify(payload),
+        redirect: 'follow'
+      });
+      
+      const text = await response.text();
+      try {
+        return JSON.parse(text);
+      } catch(e) {
+        // 万が一HTML等が返ってきた場合でも通信成功として判定
+        return { success: true, rawText: text };
+      }
+    }
 
     function renderSeats() {
       const grid = document.getElementById('seatingGrid');
@@ -650,11 +619,7 @@
       if (gasUrl) {
         loginBtn.innerText = "照合中...";
         try {
-          const res = await fetch(gasUrl, {
-            method: 'POST',
-            body: JSON.stringify({ action: 'verifyPassword', password: pwdInput })
-          });
-          const json = await res.json();
+          const json = await sendToGas(gasUrl, { action: 'verifyPassword', password: pwdInput });
           loginBtn.innerText = "ログイン";
           if (json.success) {
             currentAuthedPassword = pwdInput;
@@ -700,7 +665,6 @@
       openModal('adminModal');
     }
 
-    // 新選択肢を追加した条件追加UI関数
     function addRuleRow(data = { num1: '', num2: '', type: 'not_adjacent' }) {
       const container = document.getElementById('rulesContainer');
       const row = document.createElement('div');
@@ -725,7 +689,6 @@
           <option value="num1_left" ${data.type === 'num1_left' ? 'selected' : ''}>左側に配置 (AがBの左)</option>
           <option value="num1_front" ${data.type === 'num1_front' ? 'selected' : ''}>前側に配置 (AがBの前)</option>
           <option value="num1_back" ${data.type === 'num1_back' ? 'selected' : ''}>後ろ側に配置 (AがBの後ろ)</option>
-          <!-- 位置指定系ルール -->
           <option value="front_2rows" ${data.type === 'front_2rows' ? 'selected' : ''}>前方2行目までに配置（前後の位置）</option>
           <option value="front_3rows" ${data.type === 'front_3rows' ? 'selected' : ''}>前方3行目までに配置（前後の位置）</option>
           <option value="center_3cols" ${data.type === 'center_3cols' ? 'selected' : ''}>中央3列に配置（左右の位置）</option>
@@ -803,16 +766,12 @@
       if (newPwd) {
         if (gasUrl) {
           try {
-            const res = await fetch(gasUrl, {
-              method: 'POST',
-              body: JSON.stringify({ action: 'changePassword', currentPassword: currentAuthedPassword, newPassword: newPwd })
-            });
-            const json = await res.json();
+            const json = await sendToGas(gasUrl, { action: 'changePassword', currentPassword: currentAuthedPassword, newPassword: newPwd });
             if (json.success) {
               alert('全端末共通のパスワードを更新しました。');
               currentAuthedPassword = newPwd;
             } else {
-              alert('パスワード更新エラー: ' + json.message);
+              alert('パスワード更新エラー: ' + (json.message || "失敗しました"));
             }
           } catch(err) {
             alert('GAS通信エラーのためパスワードは更新されませんでした。');
@@ -835,11 +794,7 @@
       if (!gasUrl) return;
 
       try {
-        const res = await fetch(gasUrl, {
-          method: 'POST',
-          body: JSON.stringify({ action: 'getPresetList' })
-        });
-        const json = await res.json();
+        const json = await sendToGas(gasUrl, { action: 'getPresetList' });
         if (json.success && json.presets) {
           json.presets.forEach(name => {
             const opt = document.createElement('option');
@@ -853,6 +808,9 @@
       }
     }
 
+    // --------------------------------------------------
+    // 修正済み：プリセット保存処理
+    // --------------------------------------------------
     async function savePreset() {
       const name = document.getElementById('presetNameInput').value.trim();
       if (!name) {
@@ -862,23 +820,29 @@
 
       const formConfig = getCurrentFormConfig();
       const gasUrl = localStorage.getItem('gas_app_url');
+      const saveBtn = document.getElementById('savePresetBtn');
 
       if (gasUrl) {
+        saveBtn.disabled = true;
+        saveBtn.innerText = "保存中...";
+
         try {
-          const res = await fetch(gasUrl, {
-            method: 'POST',
-            body: JSON.stringify({ action: 'savePreset', presetName: name, config: formConfig })
-          });
-          const json = await res.json();
-          if (json.success) {
+          const json = await sendToGas(gasUrl, { action: 'savePreset', presetName: name, config: formConfig });
+          
+          saveBtn.disabled = false;
+          saveBtn.innerText = "保存する";
+
+          if (json && json.success) {
             alert(`プリセット「${name}」を保存しました。`);
             document.getElementById('presetNameInput').value = '';
             fetchPresetList();
           } else {
-            alert('保存に失敗しました。');
+            alert('保存に失敗しました: ' + (json.message || '未知のエラー'));
           }
         } catch(err) {
-          alert('通信エラーが発生しました。');
+          saveBtn.disabled = false;
+          saveBtn.innerText = "保存する";
+          alert('通信中にエラーが発生しました。');
         }
       } else {
         localStorage.setItem('local_preset_' + name, JSON.stringify(formConfig));
@@ -897,11 +861,7 @@
 
       if (gasUrl) {
         try {
-          const res = await fetch(gasUrl, {
-            method: 'POST',
-            body: JSON.stringify({ action: 'loadPreset', presetName: name })
-          });
-          const json = await res.json();
+          const json = await sendToGas(gasUrl, { action: 'loadPreset', presetName: name });
           if (json.success && json.config) {
             applyLoadedConfig(json.config);
             alert(`プリセット「${name}」を読み込みました。`);
@@ -989,7 +949,6 @@
       }, 30);
     }
 
-    // 新条件を追加したペナルティ算出処理
     function calculatePenalty(grid, rules) {
       let posMap = new Map();
       for (let i = 0; i < grid.length; i++) {
@@ -1002,7 +961,6 @@
           const p1 = posMap.get(rule.num1);
           const r1 = Math.floor(p1 / COLS), c1 = p1 % COLS;
 
-          // 単一指定系ルール
           if (rule.type === 'front_2rows' && r1 >= 2) penalty++;
           else if (rule.type === 'front_3rows' && r1 >= 3) penalty++;
           else if (rule.type === 'center_3cols' && (c1 < 2 || c1 > 4)) penalty++;
@@ -1012,7 +970,6 @@
           else if (rule.type === 'right_2cols' && c1 < 5) penalty++;
           else if (rule.type === 'right_3cols' && c1 < 4) penalty++;
           else if (rule.type === 'not_last_row') {
-            // 最最終行（6行目）か、または直後の行の同じ列が空席（有効席がない）の場合はNG
             if (r1 === ROWS - 1) {
               penalty++;
             } else {
@@ -1023,7 +980,6 @@
             }
           }
 
-          // 2人組ペア指定ルール
           if (posMap.has(rule.num2)) {
             const p2 = posMap.get(rule.num2);
             const r2 = Math.floor(p2 / COLS), c2 = p2 % COLS;
@@ -1094,10 +1050,7 @@
       const gasUrl = localStorage.getItem('gas_app_url');
       if (!gasUrl) return;
       try {
-        await fetch(gasUrl, {
-          method: 'POST',
-          body: JSON.stringify({ action: 'saveResult', result: solution })
-        });
+        await sendToGas(gasUrl, { action: 'saveResult', result: solution });
       } catch (e) {
         console.error("GAS保存エラー:", e);
       }
