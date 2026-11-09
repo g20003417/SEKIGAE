@@ -542,12 +542,15 @@
 
     let seatAssignment = new Array(TOTAL_SEATS).fill(null);
 
+    // 単一番号指定ルールの識別判定リスト（新ルール4つを追加）
     const SINGLE_NUMBER_RULES = [
       'front_2rows', 'front_3rows', 
       'center_3cols', 'center_5cols', 
       'left_2cols', 'left_3cols', 
       'right_2cols', 'right_3cols', 
-      'not_first_row', 'not_last_row'
+      'not_first_row', 'not_last_row',
+      'must_first_row', 'must_last_row',
+      'must_left_col', 'must_right_col'
     ];
 
     window.addEventListener('DOMContentLoaded', () => {
@@ -700,6 +703,10 @@
           <option value="num1_left" ${data.type === 'num1_left' ? 'selected' : ''}>左側に配置 (AがBの左)</option>
           <option value="num1_front" ${data.type === 'num1_front' ? 'selected' : ''}>前側に配置 (AがBの前)</option>
           <option value="num1_back" ${data.type === 'num1_back' ? 'selected' : ''}>後ろ側に配置 (AがBの後ろ)</option>
+          <option value="must_first_row" ${data.type === 'must_first_row' ? 'selected' : ''}>最前列にする（前が空席の場合も不可）</option>
+          <option value="must_last_row" ${data.type === 'must_last_row' ? 'selected' : ''}>最後列にする（後ろが空席の場合も不可）</option>
+          <option value="must_left_col" ${data.type === 'must_left_col' ? 'selected' : ''}>左端にする（1列目に配置）</option>
+          <option value="must_right_col" ${data.type === 'must_right_col' ? 'selected' : ''}>右端にする（7列目に配置）</option>
           <option value="front_2rows" ${data.type === 'front_2rows' ? 'selected' : ''}>前方2行目までに配置（前後の位置）</option>
           <option value="front_3rows" ${data.type === 'front_3rows' ? 'selected' : ''}>前方3行目までに配置（前後の位置）</option>
           <option value="center_3cols" ${data.type === 'center_3cols' ? 'selected' : ''}>中央3列に配置（左右の位置）</option>
@@ -971,6 +978,7 @@
       }, 30);
     }
 
+    // 新ルールのペナルティ計算処理を追加
     function calculatePenalty(grid, rules) {
       let posMap = new Map();
       for (let i = 0; i < grid.length; i++) {
@@ -991,14 +999,28 @@
           else if (rule.type === 'left_3cols' && c1 >= 3) penalty++;
           else if (rule.type === 'right_2cols' && c1 < 5) penalty++;
           else if (rule.type === 'right_3cols' && c1 < 4) penalty++;
+          else if (rule.type === 'must_left_col' && c1 !== 0) penalty++;
+          else if (rule.type === 'must_right_col' && c1 !== COLS - 1) penalty++;
+          else if (rule.type === 'must_first_row') {
+            // 最前列（1行目）でない、または直前が空席でない（前に人がいる）場合はNG
+            if (r1 !== 0) {
+              const frontIdx = (r1 - 1) * COLS + c1;
+              if (!config.emptySeats[frontIdx]) penalty++;
+            }
+          }
+          else if (rule.type === 'must_last_row') {
+            // 最後列（6行目）でない、または直後が空席でない（後ろに人がいる）場合はNG
+            if (r1 !== ROWS - 1) {
+              const behindIdx = (r1 + 1) * COLS + c1;
+              if (!config.emptySeats[behindIdx]) penalty++;
+            }
+          }
           else if (rule.type === 'not_first_row') {
             if (r1 === 0) {
               penalty++;
             } else {
               const frontIdx = (r1 - 1) * COLS + c1;
-              if (config.emptySeats[frontIdx]) {
-                penalty++;
-              }
+              if (config.emptySeats[frontIdx]) penalty++;
             }
           }
           else if (rule.type === 'not_last_row') {
@@ -1006,9 +1028,7 @@
               penalty++;
             } else {
               const behindIdx = (r1 + 1) * COLS + c1;
-              if (config.emptySeats[behindIdx]) {
-                penalty++;
-              }
+              if (config.emptySeats[behindIdx]) penalty++;
             }
           }
 
@@ -1093,7 +1113,6 @@
       openModal('errorModal');
     }
 
-    // 修正済み：文字化け防止BOM（Byte Order Mark）付きCSV出力処理
     function downloadCSV() {
       if (seatAssignment.every(val => val === null)) {
         alert('先に抽選を実行してください。');
@@ -1110,7 +1129,6 @@
         csvContent += rowStr + "\n";
       }
 
-      // UTF-8のBOM（\uFEFF）を付与してBlobオブジェクトを生成
       const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
       const blob = new Blob([bom, csvContent], { type: "text/csv;charset=utf-8;" });
       const url = URL.createObjectURL(blob);
